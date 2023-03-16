@@ -7,6 +7,7 @@ import EuropeanCities from "./constants/europeanCities";
 import { ChakraProvider } from "@chakra-ui/react";
 
 import reportWebVitals from "./reportWebVitals";
+import Highscore from "./components/highscore";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -14,6 +15,7 @@ root.render(
     <React.StrictMode>
       <Header />
       <EuropeanCapitalsGame europeanCities={EuropeanCities} />
+      <Highscore />
     </React.StrictMode>
   </ChakraProvider>
 );

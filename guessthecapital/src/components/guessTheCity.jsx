@@ -1,62 +1,81 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
-  Input,
   Text,
   Button,
   FormControl,
   FormLabel,
   Grid,
-  GridItem,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+  Input,
 } from "@chakra-ui/react";
 import color from "../theme/colors";
 import React from "react";
+import axios from "axios";
 
 const EuropeanCapitalsGame = ({ europeanCities }) => {
   const [currentCity, setCurrentCity] = useState({});
   const [remainingCities, setRemainingCities] = useState([]);
   const [score, setScore] = useState(0);
-  const [userAnswer, setUserAnswer] = useState("");
   const [feedback, setFeedback] = useState("");
-  const inputRef = useRef();
+  const [options, setOptions] = useState([]);
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [correctAnswer, setCorrectAnswer] = useState(null);
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   useEffect(() => {
-    // Shuffle the cities to make sure we don't repeat any
     const shuffledCities = europeanCities.sort(() => 0.5 - Math.random());
-
-    // Set the initial state with the first city
     setCurrentCity(shuffledCities[0]);
-
-    // Save the remaining cities for later rounds
     setRemainingCities(shuffledCities.slice(1));
   }, [europeanCities]);
+  const [playerName, setPlayerName] = useState("");
 
-  const handleAnswer = () => {
-    const isCorrect =
-      userAnswer.toLowerCase() === currentCity.capital.toLowerCase();
+  useEffect(() => {
+    if (currentCity.capital) {
+      const correctOption = currentCity.capital;
+      const incorrectOptions = europeanCities
+        .filter((city) => city.capital !== correctOption)
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 4)
+        .map((city) => city.capital);
+      setOptions(
+        [...incorrectOptions, correctOption].sort(() => 0.5 - Math.random())
+      );
+      setCorrectAnswer(correctOption);
+      setSelectedAnswer(null);
+    }
+  }, [currentCity, europeanCities]);
+
+  const handleAnswer = (answer) => {
+    setSelectedAnswer(answer);
+    const isCorrect = answer === currentCity.capital;
 
     if (isCorrect) {
       setScore(score + 1);
       setFeedback("Correct!");
     } else {
       setFeedback(
-        `Wrong! The capital of ${currentCity.country} is ${currentCity?.capital}.`
+        `Wrong! The capital of ${currentCity.country} is ${currentCity.capital}.`
       );
     }
-
-    // Move on to the next city
-    if (remainingCities.length > 0) {
-      const nextCity = remainingCities.pop();
-      setCurrentCity(nextCity);
-      setRemainingCities(remainingCities);
-      setUserAnswer("");
-      inputRef.current.focus();
-    } else {
-      // Game over!
-      alert(`Game over! Your score is ${score}/${europeanCities.length}`);
-      setScore(0);
-      setRemainingCities([]);
-    }
+    setTimeout(() => {
+      if (remainingCities.length > 0) {
+        const nextCity = remainingCities.pop();
+        setCurrentCity(nextCity);
+        setRemainingCities(remainingCities);
+        setFeedback("");
+      } else {
+        onOpen();
+      }
+    }, 2);
   };
 
   return (
@@ -64,31 +83,30 @@ const EuropeanCapitalsGame = ({ europeanCities }) => {
       {currentCity && (
         <>
           <FormControl>
-            <GridItem colSpan={2}>
-              <FormLabel color={color.text} mb={2}>
-                What is the capital of {currentCity.country}?
-              </FormLabel>
-            </GridItem>
+            <FormLabel color={color.text} mb={2}>
+              What is the capital of {currentCity.country}?
+            </FormLabel>
 
-            <Input
-              width="100%"
-              mb={2}
-              placeholder="Type your answer here"
-              value={userAnswer}
-              onChange={(e) => setUserAnswer(e.target.value)}
-              ref={inputRef}
-              autoComplete="off"
-            />
-
-            <Button
-              bg={color.primary}
-              color={color.text}
-              variant="solid"
-              disabled={!userAnswer}
-              onClick={handleAnswer}
-            >
-              Submit
-            </Button>
+            <Grid templateColumns="repeat(5, 1fr)" gap={6}>
+              {options.map((option, index) => (
+                <Button
+                  key={index}
+                  bg={
+                    selectedAnswer === option && option !== correctAnswer
+                      ? "red.500"
+                      : option === correctAnswer && selectedAnswer
+                      ? color.accent
+                      : color.primary
+                  }
+                  color={color.text}
+                  variant="solid"
+                  onClick={() => !selectedAnswer && handleAnswer(option)}
+                  isDisabled={!!selectedAnswer}
+                >
+                  {option}
+                </Button>
+              ))}
+            </Grid>
           </FormControl>
 
           <Text color={color.text} mt={2}>
@@ -100,6 +118,58 @@ const EuropeanCapitalsGame = ({ europeanCities }) => {
           <Text color={color.text} mt={2}>
             Remaining countries: {remainingCities.length}
           </Text>
+
+          <Modal isOpen={isOpen} onClose={onClose}>
+            <ModalOverlay />
+            <ModalContent>
+              <ModalHeader>Game Over</ModalHeader>
+              <ModalCloseButton />
+              <ModalBody>
+                <Text mb={4}>
+                  Your score is {score}/{europeanCities.length}.
+                </Text>
+                <FormControl>
+                  <FormLabel>Enter your name:</FormLabel>
+                  <Input
+                    placeholder="Your name"
+                    value={playerName}
+                    onChange={(e) => setPlayerName(e.target.value)}
+                  />
+                </FormControl>
+              </ModalBody>
+              <ModalFooter>
+                <Button
+                  colorScheme="blue"
+                  mr={3}
+                  onClick={() => {
+                    if (playerName) {
+                      axios
+                        .post("http://localhost:5000/api/highscores", {
+                          name: playerName,
+                          score: score,
+                        })
+                        .then(() => {
+                          // You can handle a successful post request here if needed
+                          // go to highscore component.
+                        })
+                        .catch((error) => {
+                          console.error(
+                            "Error while posting highscore:",
+                            error
+                          );
+                        });
+                    }
+                    onClose();
+                  }}
+                >
+                  Submit
+                </Button>
+                <Button variant="ghost" onClick={onClose}>
+                  Close
+                </Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
         </>
       )}
     </Box>
