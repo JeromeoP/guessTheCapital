@@ -7,7 +7,7 @@ import ScoreDisplay from "./scoreDisplay";
 import GameOverModal from "./gameOverModal";
 import { useNavigate } from "react-router-dom";
 
-const EuropeanCapitalsGame = ({ europeanCities }) => {
+const GuessTheCapitalView = ({ europeanCities }) => {
   const [currentCity, setCurrentCity] = useState({});
   const [remainingCities, setRemainingCities] = useState([]);
   const [score, setScore] = useState(0);
@@ -62,7 +62,7 @@ const EuropeanCapitalsGame = ({ europeanCities }) => {
       } else {
         onOpen();
       }
-    }, 2);
+    }, 1000);
   };
 
   return (
@@ -99,4 +99,4 @@ const EuropeanCapitalsGame = ({ europeanCities }) => {
   );
 };
 
-export default EuropeanCapitalsGame;
+export default GuessTheCapitalView;

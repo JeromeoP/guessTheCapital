@@ -7,12 +7,23 @@ import { ArrowLeftIcon } from "@chakra-ui/icons";
 function Header() {
   const location = useLocation();
   const onHighscore = location.pathname === "/highscore";
+  const onAsian = location.pathname === "/asiancities";
 
   return (
     <Flex align="center" justify="space-between" bg={color.secondary} p="4">
       <Heading as="h1" color={color.text} size="lg">
         Guess the Capital
       </Heading>
+      <Link
+        as={RouterLink}
+        to={onAsian ? "/" : "/asiancities"}
+        color={color.text}
+      >
+        <Box display="flex" alignItems="center">
+          {onAsian ? "Play european capitals" : "Play asian capitals"}
+        </Box>
+      </Link>
+      _
       <Link
         as={RouterLink}
         to={onHighscore ? "/" : "/highscore"}

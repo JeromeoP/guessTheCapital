@@ -1,8 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import Header from "./components/header";
-import EuropeanCapitalsGame from "./components/guessTheCityView";
+import GuessTheCapitalView from "./components/guessTheCityView";
 import EuropeanCities from "./constants/europeanCities";
+import AsianCities from "./constants/asianCities";
+
 import { ChakraProvider } from "@chakra-ui/react";
 
 import reportWebVitals from "./reportWebVitals";
@@ -19,7 +21,11 @@ root.render(
         <Routes>
           <Route
             path="/"
-            element={<EuropeanCapitalsGame europeanCities={EuropeanCities} />}
+            element={<GuessTheCapitalView europeanCities={EuropeanCities} />}
+          />
+          <Route
+            path="/asianCities"
+            element={<GuessTheCapitalView europeanCities={AsianCities} />}
           />
           <Route path="/highscore" element={<Highscore />} />
         </Routes>
