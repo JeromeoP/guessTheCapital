@@ -1,21 +1,29 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
 import Header from "./components/header";
-import EuropeanCapitalsGame from "./components/guessTheCity";
+import EuropeanCapitalsGame from "./components/guessTheCityView";
 import EuropeanCities from "./constants/europeanCities";
 import { ChakraProvider } from "@chakra-ui/react";
 
 import reportWebVitals from "./reportWebVitals";
 import Highscore from "./components/highscore";
 
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <ChakraProvider>
     <React.StrictMode>
-      <Header />
-      <EuropeanCapitalsGame europeanCities={EuropeanCities} />
-      <Highscore />
+      <Router>
+        <Header />
+        <Routes>
+          <Route
+            path="/"
+            element={<EuropeanCapitalsGame europeanCities={EuropeanCities} />}
+          />
+          <Route path="/highscore" element={<Highscore />} />
+        </Routes>
+      </Router>
     </React.StrictMode>
   </ChakraProvider>
 );
