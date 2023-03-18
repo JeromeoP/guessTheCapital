@@ -62,7 +62,7 @@ const GuessTheCapitalView = ({ europeanCities }) => {
       } else {
         onOpen();
       }
-    }, 1000);
+    }, 1);
   };
 
   return (

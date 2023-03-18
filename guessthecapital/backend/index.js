@@ -18,13 +18,30 @@ const db = new sqlite3.Database("highscores.db", (err) => {
 
 db.serialize(() => {
   db.run(
-    "CREATE TABLE IF NOT EXISTS highscores (id INTEGER PRIMARY KEY, name TEXT NOT NULL, score INTEGER NOT NULL)"
+    "CREATE TABLE IF NOT EXISTS europeanhighscores (id INTEGER PRIMARY KEY, name TEXT NOT NULL, score INTEGER NOT NULL)"
+  );
+});
+db.serialize(() => {
+  db.run(
+    "CREATE TABLE IF NOT EXISTS asianhighscores (id INTEGER PRIMARY KEY, name TEXT NOT NULL, score INTEGER NOT NULL)"
   );
 });
 
-app.get("/api/highscores", (req, res) => {
+app.get("/api/european/highscores", (req, res) => {
   db.all(
-    "SELECT * FROM highscores ORDER BY score DESC LIMIT 10",
+    "SELECT * FROM europeanhighscores ORDER BY score DESC LIMIT 10",
+    [],
+    (err, rows) => {
+      if (err) {
+        throw err;
+      }
+      res.json(rows);
+    }
+  );
+});
+app.get("/api/asian/highscores", (req, res) => {
+  db.all(
+    "SELECT * FROM asianhighscores ORDER BY score DESC LIMIT 10",
     [],
     (err, rows) => {
       if (err) {
@@ -35,12 +52,31 @@ app.get("/api/highscores", (req, res) => {
   );
 });
 
-app.post("/api/highscores", (req, res) => {
+app.post("/api/european/highscores", (req, res) => {
   const { name, score } = req.body;
 
   if (typeof name === "string" && typeof score === "number") {
     db.run(
-      "INSERT INTO highscores (name, score) VALUES (?, ?)",
+      "INSERT INTO europeanhighscores (name, score) VALUES (?, ?)",
+      [name, score],
+      function (err) {
+        if (err) {
+          return console.error(err.message);
+        }
+        res.status(201).json({ message: "Highscore added successfully." });
+      }
+    );
+  } else {
+    res.status(400).json({ message: "Invalid request format." });
+  }
+});
+
+app.post("/api/asian/highscores", (req, res) => {
+  const { name, score } = req.body;
+
+  if (typeof name === "string" && typeof score === "number") {
+    db.run(
+      "INSERT INTO asianhighscores (name, score) VALUES (?, ?)",
       [name, score],
       function (err) {
         if (err) {

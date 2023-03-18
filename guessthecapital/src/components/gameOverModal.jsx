@@ -14,19 +14,27 @@ import {
 } from "@chakra-ui/react";
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const GameOverModal = ({ isOpen, onClose, score, totalQuestions }) => {
   const [playerName, setPlayerName] = useState("");
+  const location = useLocation();
+
   const navigate = useNavigate();
+  const onAsian = location.pathname === "/asiancities";
 
   const submitHighscore = () => {
     if (playerName) {
       axios
-        .post("http://localhost:5000/api/highscores", {
-          name: playerName,
-          score: score,
-        })
+        .post(
+          `http://localhost:5000/api/${
+            !onAsian ? "european/highscores" : "asian/highscores"
+          }`,
+          {
+            name: playerName,
+            score: score,
+          }
+        )
         .then(() => {
           navigate("/highscore");
         })
